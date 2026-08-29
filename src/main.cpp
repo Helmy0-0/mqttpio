@@ -33,7 +33,7 @@ void setup_wifi() {
 void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
-    if (client.connect("ESP32HelmyMultiSensor")) {
+    if (client.connect("ESPressoClient")) {
       Serial.println("connected");
     } else {
       Serial.print("failed, rc=");
@@ -75,14 +75,22 @@ void loop() {
     waterPercent = constrain(waterPercent, 0, 100);
 
 
-    String payload = "{ \"pot_value\": " + String(potValue) +
+    String potPayload = "{ \"pot_value\": " + String(potValue) +
+                    ", \"pot_voltage\": " + String(potVoltage, 2) + " }";
+
+    String waterPayload = "{ \"water_raw\": " + String(waterRaw) +
+                     ", \"water_percent\": " + String(waterPercent) + " }";          
+
+    String allPayload = "{ \"pot_value\": " + String(potValue) +
                      ", \"pot_voltage\": " + String(potVoltage, 2) +
                      ", \"water_raw\": " + String(waterRaw) +
                      ", \"water_percent\": " + String(waterPercent) + " }";
 
     Serial.print("Publish message: ");
-    Serial.println(payload);
+    Serial.println(allPayload);
 
-    client.publish("helmy/", payload.c_str());
+    client.publish("espresso/sensor/pot", potPayload.c_str());
+    client.publish("espresso/sensor/water", waterPayload.c_str());
+    client.publish("espresso/sensor", allPayload.c_str());
   }
 }
